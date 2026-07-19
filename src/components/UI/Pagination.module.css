@@ -5,7 +5,6 @@
   margin-top: 2rem;
   flex-wrap: wrap;
 }
-
 .button {
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
@@ -14,24 +13,20 @@
   color: var(--text);
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 }
-
 .button:hover:not(:disabled) {
   background: var(--border);
 }
-
 .button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
 .active {
   background: var(--accent);
   color: white;
   border-color: var(--accent);
 }
-
 .active:hover {
   background: var(--accent-hover);
 }

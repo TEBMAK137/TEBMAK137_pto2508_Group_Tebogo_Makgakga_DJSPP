@@ -1,12 +1,4 @@
-/**
- * SortSelect Component – Dropdown to sort podcasts.
- *
- * @component
- * @param {Object} props
- * @param {string} props.value - Currently selected sort option
- * @param {Function} props.onChange - Handler for sort changes
- * @returns {JSX.Element}
- */
+/** Sort dropdown for podcasts. */
 import React from "react";
 import { SORT_OPTIONS } from "../../utils/constants";
 import styles from "./SortSelect.module.css";

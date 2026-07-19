@@ -1,16 +1,4 @@
-/**
- * Favourites Page – Displays all favourited episodes.
- *
- * Features:
- * - Groups favourites by show title
- * - Sorting options (newest, oldest, title)
- * - Remove button to unfavourite
- * - Shows date added
- * - Play button to play episode
- *
- * @component
- * @returns {JSX.Element}
- */
+/** Favourites Page – saved episodes grouped by show. */
 import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { usePodcast } from "../context/PodcastContext";
@@ -22,9 +10,6 @@ export default function Favourites() {
     usePodcast();
   const [sortBy, setSortBy] = useState("newest");
 
-  /**
-   * Sort favourites based on selected option.
-   */
   const sortedFavourites = useMemo(() => {
     const list = [...favourites];
     switch (sortBy) {
@@ -36,16 +21,13 @@ export default function Favourites() {
         return list.sort(
           (a, b) => new Date(a.dateAdded) - new Date(b.dateAdded),
         );
-      default: // 'newest'
+      default:
         return list.sort(
           (a, b) => new Date(b.dateAdded) - new Date(a.dateAdded),
         );
     }
   }, [favourites, sortBy]);
 
-  /**
-   * Group favourites by show title.
-   */
   const grouped = sortedFavourites.reduce((acc, fav) => {
     const key = fav.showTitle || "Unknown Show";
     if (!acc[key]) acc[key] = [];
@@ -53,9 +35,6 @@ export default function Favourites() {
     return acc;
   }, {});
 
-  /**
-   * Play a favourited episode.
-   */
   const playFavourite = (ep) => {
     setCurrentEpisode({
       id: ep.id,
@@ -70,10 +49,7 @@ export default function Favourites() {
   return (
     <div className={styles.container}>
       <Header />
-
       <h2 className={styles.heading}>❤️ Your Favourites</h2>
-
-      {/* Sorting controls */}
       <div className={styles.controls}>
         <label htmlFor="sortSelect">Sort by: </label>
         <select
@@ -88,8 +64,6 @@ export default function Favourites() {
           <option value="title-desc">Title Z–A</option>
         </select>
       </div>
-
-      {/* Empty state */}
       {favourites.length === 0 ? (
         <div className={styles.empty}>
           <p>No favourites yet. Go explore some episodes!</p>
@@ -98,7 +72,6 @@ export default function Favourites() {
           </Link>
         </div>
       ) : (
-        // Grouped list by show
         Object.entries(grouped).map(([showTitle, episodes]) => (
           <div key={showTitle} className={styles.group}>
             <h3>{showTitle}</h3>
@@ -138,7 +111,6 @@ export default function Favourites() {
           </div>
         ))
       )}
-
       <Link to="/" className={styles.backLink}>
         ← Back to Home
       </Link>

@@ -2,6 +2,7 @@
  * Entry point for the React application.
  * Wraps the app in StrictMode and BrowserRouter for client-side routing.
  */
+
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";

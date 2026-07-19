@@ -1,20 +1,17 @@
 .container {
   margin-bottom: 1.5rem;
 }
-
 .label {
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text);
   margin-bottom: 0.5rem;
 }
-
 .buttonGroup {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
-
 .button {
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
@@ -22,20 +19,17 @@
   font-weight: 500;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   background: var(--border);
   color: var(--text);
 }
-
 .button:hover {
   opacity: 0.8;
 }
-
 .active {
   background: var(--accent);
   color: white;
 }
-
 .active:hover {
   background: var(--accent-hover);
 }

@@ -3,7 +3,6 @@
   flex: 1;
   max-width: 400px;
 }
-
 .input {
   width: 100%;
   padding: 0.5rem 1rem 0.5rem 2.5rem;
@@ -14,15 +13,13 @@
   font-size: 0.875rem;
   outline: none;
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
-
 .input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
-
 .icon {
   position: absolute;
   left: 0.75rem;
@@ -31,5 +28,4 @@
   width: 1rem;
   height: 1rem;
   color: var(--muted);
-  pointer-events: none;
 }

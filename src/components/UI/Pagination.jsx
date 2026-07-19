@@ -1,23 +1,11 @@
-/**
- * Pagination Component – Page navigation for podcast grid.
- *
- * @component
- * @param {Object} props
- * @param {number} props.currentPage - Currently active page
- * @param {number} props.totalPages - Total number of pages
- * @param {Function} props.onPageChange - Handler when page changes
- * @returns {JSX.Element|null}
- */
+/** Page navigation for podcast grid. */
 import React from "react";
 import styles from "./Pagination.module.css";
 
 export default function Pagination({ currentPage, totalPages, onPageChange }) {
   if (totalPages <= 1) return null;
 
-  // Generate array of page numbers
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-
-  // Limit visible pages for large page counts
   const maxVisible = 5;
   let visiblePages = pages;
   if (totalPages > maxVisible) {
@@ -35,7 +23,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
       >
         Previous
       </button>
-
       {visiblePages.map((page) => (
         <button
           key={page}
@@ -46,7 +33,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
           {page}
         </button>
       ))}
-
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}

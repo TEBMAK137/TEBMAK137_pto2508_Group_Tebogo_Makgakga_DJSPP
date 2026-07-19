@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "name": "podcast-djs05-final",
   "private": true,
   "version": "1.0.0",

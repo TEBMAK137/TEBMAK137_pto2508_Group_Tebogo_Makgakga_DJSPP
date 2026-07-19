@@ -5,10 +5,9 @@
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 50%;
-  transition: background 0.2s ease;
+  transition: background 0.2s;
   line-height: 1;
 }
-
 .toggle:hover {
   background: var(--border);
 }

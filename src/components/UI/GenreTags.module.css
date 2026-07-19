@@ -3,11 +3,10 @@
   flex-wrap: wrap;
   gap: 0.4rem;
 }
-
 .tag {
-  background: #ede9fe;
+  background: #f1f1fe;
   color: #4c1d95;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 500;
   padding: 0.2rem 0.6rem;
   border-radius: 9999px;

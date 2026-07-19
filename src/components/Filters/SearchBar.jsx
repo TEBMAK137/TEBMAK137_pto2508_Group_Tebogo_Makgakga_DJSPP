@@ -1,17 +1,4 @@
-/**
- * SearchBar Component – Real-time podcast search by title.
- *
- * Features:
- * - Case-insensitive search
- * - Filters results dynamically as user types
- * - Search icon for visual clarity
- *
- * @component
- * @param {Object} props
- * @param {string} props.value - Current search query
- * @param {Function} props.onChange - Handler for input changes
- * @returns {JSX.Element}
- */
+/** Search input with icon. */
 import React from "react";
 import styles from "./SearchBar.module.css";
 
@@ -25,13 +12,11 @@ export default function SearchBar({ value, onChange }) {
         onChange={(e) => onChange(e.target.value)}
         className={styles.input}
       />
-      {/* Magnifying glass SVG icon */}
       <svg
         className={styles.icon}
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
       >
         <path
           strokeLinecap="round"

@@ -1,30 +1,15 @@
-/**
- * RecommendedCarousel Component – Horizontal scrolling carousel of top podcasts.
- *
- * Features:
- * - CSS-only horizontal scroll (no external libraries needed)
- * - Touch-friendly on mobile
- * - Shows top 10 podcasts by default
- * - Click to navigate to show detail
- *
- * @component
- * @param {Object} props
- * @param {Array} props.podcasts - Array of podcast objects
- * @returns {JSX.Element}
- */
+/** Horizontal scrolling carousel of top podcasts. */
 import React from "react";
 import { Link } from "react-router-dom";
 import styles from "./RecommendedCarousel.module.css";
 
 export default function RecommendedCarousel({ podcasts }) {
-  // Take top 10 podcasts for the carousel
   const recommended = podcasts.slice(0, 10);
-
   if (recommended.length === 0) return null;
 
   return (
-    <section className={styles.carouselContainer}>
-      <h2 className={styles.heading}>Recommended Shows</h2>
+    <div className={styles.carouselContainer}>
+      <h2 className={styles.heading}>🎠 Recommended Shows</h2>
       <div className={styles.carousel}>
         {recommended.map((podcast) => (
           <Link
@@ -49,6 +34,6 @@ export default function RecommendedCarousel({ podcasts }) {
           </Link>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

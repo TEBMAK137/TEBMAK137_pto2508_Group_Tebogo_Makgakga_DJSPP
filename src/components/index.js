@@ -1,6 +1,3 @@
-/**
- * UI Components Index – Central export file for all UI components.
- */
 export { default as AudioPlayer } from "./AudioPlayer";
 export { default as Error } from "./Error";
 export { default as GenreTags } from "./GenreTags";
