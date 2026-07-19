@@ -1,12 +1,35 @@
-.appHeader {
+.header {
   display: flex;
   justify-content: space-between;
-  padding: 1rem;
-  background: white;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 3px var(--shadow);
 }
-
-.appHeader a {
+.left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #5e2a84, #c23b77);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
   text-decoration: none;
-  color: black;
+}
+.nav {
+  display: flex;
+  gap: 1rem;
+}
+.nav a {
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 500;
+}
+.nav a:hover {
+  color: #7c3aed;
 }

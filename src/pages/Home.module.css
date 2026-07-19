@@ -1,15 +1,21 @@
+.container {
+  min-height: 100vh;
+  background: var(--bg);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem 6rem;
+}
 .controls {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-wrap: wrap;
   gap: 1rem;
-  margin: 10px;
+  margin-bottom: 1.5rem;
+  align-items: center;
+  justify-content: space-between;
 }
-
-@media (min-width: 768px) {
+@media (max-width: 640px) {
   .controls {
-    flex-direction: row;
-    align-items: flex-end;
-    gap: 1.5rem;
+    flex-direction: column;
+    align-items: stretch;
   }
 }

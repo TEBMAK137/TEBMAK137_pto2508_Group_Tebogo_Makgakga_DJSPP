@@ -1,162 +1,202 @@
-import React, { createContext, useEffect, useState } from "react";
+/**
+ * PodcastContext – Global state provider for the entire app.
+ * Manages:
+ * - Podcast data (fetched from API)
+ * - Search, filter, sort, pagination
+ * - Theme (light/dark)
+ * - Favourites (localStorage)
+ * - Audio player state
+ *
+ * @module PodcastContext
+ */
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+} from "react";
 import { fetchPodcasts } from "../api/fetchPata";
+import { SORT_OPTIONS, ITEMS_PER_PAGE } from "../utils/constants";
+
+// --- Create the context ---
+const PodcastContext = createContext(null);
 
 /**
- * React context for managing podcast-related state and filters.
- * Provides access to podcast data, pagination, filtering, and sorting.
- *
- * @typedef {Object} Podcast
- * @property {number} id - Unique identifier for the podcast.
- * @property {string} title - Title of the podcast.
- * @property {string} updated - ISO string of the last updated date.
- * @property {number[]} genres - Array of genre IDs.
- */
-
-/**
- * Context object used throughout the app to consume podcast data and control logic.
- * @type {React.Context<Object>}
- */
-export const PodcastContext = createContext();
-
-/**
- * List of available sorting options used in the UI.
- * Each option includes a `key` used for internal logic and a `label` for display.
- *
- * @type {{key: string, label: string}[]}
- */
-export const SORT_OPTIONS = [
-  { key: "default", label: "Default" },
-  { key: "date-desc", label: "Newest" },
-  { key: "date-asc", label: "Oldest" },
-  { key: "title-asc", label: "Title A → Z" },
-  { key: "title-desc", label: "Title Z → A" },
-];
-
-/**
- * PodcastProvider component.
- *
- * Wraps child components and provides podcast-related data and control state via context.
- * Fetches podcast data on mount and enables dynamic filtering, sorting, and pagination.
+ * Provider component – wraps the app and provides all state.
  *
  * @param {Object} props
- * @param {React.ReactNode} props.children - Child components that consume the context.
- * @returns {JSX.Element} Provider wrapping the application content.
+ * @param {React.ReactNode} props.children - Child components
+ * @returns {JSX.Element}
  */
 export function PodcastProvider({ children }) {
-  const [allPodcasts, setAllPodcasts] = useState([]);
+  // --- Podcasts & UI state ---
+  const [allPodcasts, setAllPodcasts] = useState([]); // Full unfiltered list
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState(SORT_OPTIONS.NEWEST);
+  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState("date-desc");
-  const [genre, setGenre] = useState("all");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  // --- Theme (stored in localStorage) ---
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "light";
+  });
+
+  // Apply theme to the document and persist changes
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  // --- Favourites (stored in localStorage) ---
+  const [favourites, setFavourites] = useState(() => {
+    try {
+      const saved = localStorage.getItem("favourites");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Persist favourites whenever they change
+  useEffect(() => {
+    localStorage.setItem("favourites", JSON.stringify(favourites));
+  }, [favourites]);
 
   /**
-   * Fetch podcast data from the API when the provider mounts.
+   * Toggle favourite status for an episode.
+   * If already favourited, removes it; otherwise adds it.
+   *
+   * @param {Object} episode - Episode object to toggle.
    */
+  const toggleFavourite = (episode) => {
+    setFavourites((prev) => {
+      const exists = prev.some((f) => f.id === episode.id);
+      if (exists) {
+        console.log(`🗑️ Removed from favourites: ${episode.title}`);
+        return prev.filter((f) => f.id !== episode.id);
+      } else {
+        console.log(`❤️ Added to favourites: ${episode.title}`);
+        return [...prev, { ...episode, dateAdded: new Date().toISOString() }];
+      }
+    });
+  };
+
+  // --- Audio Player state ---
+  const [currentEpisode, setCurrentEpisode] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  // --- Fetch podcast data on mount ---
   useEffect(() => {
     fetchPodcasts(setAllPodcasts, setError, setLoading);
   }, []);
 
-  /**
-   * Reset to the first page when filters change.
-   */
+  // --- Reset to page 1 when filters change ---
   useEffect(() => {
-    setPage(1);
-  }, [search, sortKey, genre]);
+    setCurrentPage(1);
+  }, [searchTerm, sortBy, selectedGenres]);
 
-  /**
-   * Dynamically calculate the number of items per page based on screen width.
-   */
-  useEffect(() => {
-    const calculatePageSize = () => {
-      const screenW = window.innerWidth;
-      if (screenW <= 1024) {
-        setPageSize(10);
-        return;
-      }
-      const cardWidth = 260;
-      const maxRows = 2;
-      const columns = Math.floor(screenW / cardWidth);
-      const pageSize = columns * maxRows;
-      setPageSize(pageSize);
-    };
+  // --- Filter, search, sort pipeline ---
+  const processed = useMemo(() => {
+    let result = [...allPodcasts];
 
-    calculatePageSize();
-    window.addEventListener("resize", calculatePageSize);
-    return () => window.removeEventListener("resize", calculatePageSize);
-  }, []);
-
-  /**
-   * Apply filtering and sorting to the full dataset based on search input,
-   * selected genre, and sort option.
-   *
-   * @returns {Podcast[]} Filtered and sorted list of podcasts.
-   */
-  const applyFilters = () => {
-    let data = [...allPodcasts];
-
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      data = data.filter((p) => p.title.toLowerCase().includes(q));
+    // 1. Filter by search term (case‑insensitive)
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter((p) => p.title.toLowerCase().includes(term));
     }
 
-    if (genre !== "all") {
-      data = data.filter((p) => p.genres.includes(Number(genre)));
+    // 2. Filter by selected genres (any match)
+    if (selectedGenres.length > 0) {
+      result = result.filter((p) =>
+        p.genreNames.some((g) => selectedGenres.includes(g)),
+      );
     }
 
-    switch (sortKey) {
-      case "title-asc":
-        data.sort((a, b) => a.title.localeCompare(b.title));
+    // 3. Sort
+    switch (sortBy) {
+      case SORT_OPTIONS.NEWEST:
+        result.sort((a, b) => new Date(b.updated) - new Date(a.updated));
         break;
-      case "title-desc":
-        data.sort((a, b) => b.title.localeCompare(a.title));
+      case SORT_OPTIONS.OLDEST:
+        result.sort((a, b) => new Date(a.updated) - new Date(b.updated));
         break;
-      case "date-asc":
-        data.sort((a, b) => new Date(a.updated) - new Date(b.updated));
+      case SORT_OPTIONS.TITLE_ASC:
+        result.sort((a, b) => a.title.localeCompare(b.title));
         break;
-      case "date-desc":
-        data.sort((a, b) => new Date(b.updated) - new Date(a.updated));
+      case SORT_OPTIONS.TITLE_DESC:
+        result.sort((a, b) => b.title.localeCompare(a.title));
         break;
-      case "default":
       default:
         break;
     }
+    return result;
+  }, [allPodcasts, searchTerm, sortBy, selectedGenres]);
 
-    return data;
-  };
-
-  const filtered = applyFilters();
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const paged = filtered.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
+  // --- Pagination ---
+  const totalPages = Math.ceil(processed.length / ITEMS_PER_PAGE);
+  const paginated = processed.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
   );
 
-  /**
-   * Context value provided to consumers.
-   */
+  // --- Context value object ---
   const value = {
+    // Podcast data
+    podcasts: paginated,
+    allPodcasts,
+    totalPages,
+    currentPage,
+    setCurrentPage,
     loading,
     error,
-    search,
-    setSearch,
-    sortKey,
-    setSortKey,
-    genre,
-    setGenre,
-    page: currentPage,
-    setPage,
-    totalPages,
-    podcasts: paged,
-    allPodcastsCount: filtered.length,
-    allPodcasts, // useful for detail pages
+
+    // Filters
+    searchTerm,
+    setSearchTerm,
+    sortBy,
+    setSortBy,
+    selectedGenres,
+    setSelectedGenres,
+
+    // Theme
+    theme,
+    setTheme,
+
+    // Favourites
+    favourites,
+    toggleFavourite,
+
+    // Audio
+    currentEpisode,
+    setCurrentEpisode,
+    isPlaying,
+    setIsPlaying,
+    progress,
+    setProgress,
+    duration,
+    setDuration,
   };
 
   return (
     <PodcastContext.Provider value={value}>{children}</PodcastContext.Provider>
   );
+}
+
+/**
+ * Custom hook to access the podcast context.
+ *
+ * @returns {Object} The podcast context value.
+ * @throws {Error} If used outside of PodcastProvider.
+ */
+export function usePodcast() {
+  const context = useContext(PodcastContext);
+  if (!context) {
+    throw new Error("usePodcast must be used within a PodcastProvider");
+  }
+  return context;
 }

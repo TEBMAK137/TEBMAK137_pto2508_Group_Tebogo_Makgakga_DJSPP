@@ -1,21 +1,14 @@
 import React from "react";
 import styles from "./Error.module.css";
 
-/**
- * Error component.
- *
- * Displays an error message in a styled container.
- * Used to inform the user when data fetching or other operations fail.
- *
- * @param {Object} props
- * @param {string} props.message - The error message to display.
- *
- * @returns {JSX.Element} A styled error message element.
- */
-export default function Error({ message }) {
+export default function Error({ message, onRetry }) {
   return (
-    <div className={styles.messageContainer}>
-      <div className={styles.error}>{message}</div>
+    <div className={styles.container}>
+      <p className={styles.title}>⚠️ Something went wrong</p>
+      <p className={styles.message}>{message}</p>
+      <button onClick={onRetry} className={styles.button}>
+        Try again
+      </button>
     </div>
   );
 }

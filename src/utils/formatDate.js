@@ -1,16 +1,31 @@
-/**
- * @function formatDate
- * Converts an ISO date string into a human-readable, localized date string.
- * Example output: "July 7, 2025".
- *
- * @param {string} isoString - A valid ISO 8601 date string (e.g., "2025-07-07T12:34:56Z").
- * @returns {string} Formatted date string in the user's local language and format.
- **/
-export function formatDate(isoString) {
-  const date = new Date(isoString);
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
+// /** Formats an ISO date: relative for recent, full for older. */
+// export function formatRelativeDate(isoDate) {
+//   const date = new Date(isoDate);
+//   if (isNaN(date.getTime())) return "Unknown date";
+
+//   const now = new Date();
+//   const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+//   if (diffDays > 365) {
+//     return date.toLocaleDateString("en-US", {
+//       year: "numeric",
+//       month: "short",
+//       day: "numeric",
+//     });
+//   }
+
+//   if (diffDays <= 0) return "Today";
+//   if (diffDays === 1) return "1 day ago";
+//   if (diffDays < 7) return `${diffDays} days ago`;
+//   const diffWeeks = Math.floor(diffDays / 7);
+//   if (diffWeeks === 1) return "1 week ago";
+//   if (diffWeeks < 5) return `${diffWeeks} weeks ago`;
+//   const diffMonths = Math.floor(diffDays / 30);
+//   if (diffMonths === 1) return "1 month ago";
+//   if (diffMonths < 12) return `${diffMonths} months ago`;
+//   return date.toLocaleDateString("en-US", {
+//     year: "numeric",
+//     month: "short",
+//     day: "numeric",
+//   });
+// }

@@ -1,30 +1,23 @@
+import React from "react";
 import { Routes, Route } from "react-router-dom";
-import Header from "./components/UI/Header";
+import { PodcastProvider } from "./context/PodcastContext";
 import Home from "./pages/Home";
 import ShowDetail from "./pages/ShowDetail";
-import { PodcastProvider } from "./context/PodcastContext";
+import Favourites from "./pages/Favourites";
+import AudioPlayer from "./components/UI/AudioPlayer";
+import styles from "./App.module.css";
 
-/**
- * Root component of the Podcast Explorer app.
- *
- * - Wraps the application in the `PodcastProvider` context for global state.
- * - Includes the `Header` component, displayed on all pages.
- * - Defines client-side routes using React Router:
- *    - "/" renders the `Home` page
- *    - "/show/:id" renders the `ShowDetail` page for a specific podcast
- *
- * @returns {JSX.Element} The application component with routing and context.
- */
 export default function App() {
   return (
-    <>
-      <Header />
-      <PodcastProvider>
+    <PodcastProvider>
+      <div className={styles.app}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path={`/show/:id`} element={<ShowDetail />} />
+          <Route path="/show/:id" element={<ShowDetail />} />
+          <Route path="/favourites" element={<Favourites />} />
         </Routes>
-      </PodcastProvider>
-    </>
+        <AudioPlayer />
+      </div>
+    </PodcastProvider>
   );
 }

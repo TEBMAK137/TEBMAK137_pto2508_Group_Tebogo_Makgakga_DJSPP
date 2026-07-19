@@ -1,52 +1,55 @@
-import {
-  SearchBar,
-  SortSelect,
-  GenreFilter,
-  PodcastGrid,
-  Pagination,
-  Loading,
-  Error,
-} from "../components";
+import React from "react";
+import { usePodcast } from "../context/PodcastContext";
+import Header from "../components/UI/Header";
+import SearchBar from "../components/Filters/SearchBar";
+import SortSelect from "../components/Filters/SortSelect";
+import GenreFilter from "../components/Filters/GenreFilter";
+import PodcastGrid from "../components/Podcasts/PodcastGrid";
+import RecommendedCarousel from "../components/Podcasts/RecommendedCarousel";
+import Pagination from "../components/UI/Pagination";
+import Loading from "../components/UI/Loading";
+import Error from "../components/UI/Error";
 import styles from "./Home.module.css";
-import { genres } from "../data";
-import { PodcastContext } from "../context/PodcastContext";
-import { useContext } from "react";
 
-/**
- * Home page of the Podcast Explorer app.
- *
- * - Displays the main podcast browsing interface.
- * - Includes search, genre filter, and sort controls.
- * - Shows a loading indicator or error message based on fetch state.
- * - Renders the podcast grid and pagination once data is loaded.
- *
- * Context:
- * - Consumes `PodcastContext` to access podcast data, loading, and error states.
- *
- * @returns {JSX.Element} The home page content with filters, results, and feedback states.
- */
 export default function Home() {
-  const { podcasts, loading, error } = useContext(PodcastContext);
+  const {
+    podcasts,
+    totalPages,
+    currentPage,
+    setCurrentPage,
+    loading,
+    error,
+    searchTerm,
+    setSearchTerm,
+    sortBy,
+    setSortBy,
+    selectedGenres,
+    setSelectedGenres,
+    allPodcasts,
+  } = usePodcast();
+
+  if (loading) return <Loading />;
+  if (error)
+    return <Error message={error} onRetry={() => window.location.reload()} />;
 
   return (
-    <main className={styles.main}>
-      <section className={styles.controls}>
-        <SearchBar />
-        <GenreFilter genres={genres} />
-        <SortSelect />
-      </section>
-
-      {loading && <Loading message="Loading podcasts..." />}
-      {error && (
-        <Error message={`Error occurred while fetching podcasts: ${error}`} />
-      )}
-
-      {!loading && !error && (
-        <>
-          <PodcastGrid />
-          <Pagination />
-        </>
-      )}
-    </main>
+    <div className={styles.container}>
+      <Header />
+      <RecommendedCarousel podcasts={allPodcasts} />
+      <div className={styles.controls}>
+        <SearchBar value={searchTerm} onChange={setSearchTerm} />
+        <SortSelect value={sortBy} onChange={setSortBy} />
+      </div>
+      <GenreFilter
+        selectedGenres={selectedGenres}
+        onChange={setSelectedGenres}
+      />
+      <PodcastGrid podcasts={podcasts} />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
+    </div>
   );
 }

@@ -1,19 +1,31 @@
-.paginationWrapper {
+.container {
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
   gap: 0.5rem;
-  padding: 1rem 0;
+  margin-top: 2rem;
 }
-.pageButton {
-  padding: 0.5rem 0.75rem;
-  border-radius: 999px;
-  background-color: #eee;
-  font-size: 1rem;
-  border: none;
+.button {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 0.875rem;
   cursor: pointer;
+  transition: all 0.2s;
+}
+.button:hover:not(:disabled) {
+  background: var(--border);
+}
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .active {
-  background-color: #2563eb;
+  background: #7c3aed;
   color: white;
+  border-color: #7c3aed;
+}
+.active:hover {
+  background: #6d28d9;
 }

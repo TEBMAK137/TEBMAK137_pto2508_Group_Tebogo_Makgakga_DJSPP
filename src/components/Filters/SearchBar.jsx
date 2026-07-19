@@ -1,27 +1,41 @@
-import { useState, useEffect, useContext } from "react";
-import { PodcastContext } from "../../context/PodcastContext";
+/**
+ * Search Bar Component – Real‑time podcast search by title.
+ * - Case‑insensitive
+ * - Filters results dynamically as user types
+ *
+ * @component
+ * @param {Object} props
+ * @param {string} props.value - Current search query
+ * @param {Function} props.onChange - Handler for input changes
+ * @returns {JSX.Element}
+ */
+import React from "react";
 import styles from "./SearchBar.module.css";
 
-/**
- * Search input with debounced update.
- */
-export default function SearchBar() {
-  const { search, setSearch } = useContext(PodcastContext);
-  const [value, setValue] = useState(search);
-
-  // Debounce input (300ms) to avoid rapid updates.
-  useEffect(() => {
-    const id = setTimeout(() => setSearch(value), 300);
-    return () => clearTimeout(id);
-  }, [value]);
-
+export default function SearchBar({ value, onChange }) {
   return (
-    <input
-      type="search"
-      placeholder="Search podcasts…"
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-      className={styles.searchInput}
-    />
+    <div className={styles.container}>
+      <input
+        type="text"
+        placeholder="Search by title..."
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={styles.input}
+      />
+      {/* Magnifying glass icon */}
+      <svg
+        className={styles.icon}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        />
+      </svg>
+    </div>
   );
 }
