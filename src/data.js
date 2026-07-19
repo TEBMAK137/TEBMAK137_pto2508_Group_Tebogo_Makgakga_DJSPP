@@ -1,4 +1,7 @@
-/** Static genre data (maps IDs to names). */
+/**
+ * Static genre data – maps genre IDs to human-readable names.
+ * These IDs match the API's genre identifiers.
+ */
 export const genres = [
   { id: 1, title: "Personal Growth" },
   { id: 2, title: "Investigative Journalism" },

@@ -1,10 +1,12 @@
 /**
  * ShowDetail Page – Displays a single podcast show with seasons and episodes.
+ *
  * Features:
- * - Fetches show data by ID from the URL parameter
+ * - Fetches show data by ID from URL parameter
  * - Renders seasons and episodes
  * - Play button for each episode (triggers global audio player)
  * - Favourite button for each episode (saves to localStorage)
+ * - Back navigation to home
  *
  * @component
  * @returns {JSX.Element}
@@ -13,6 +15,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { fetchShowById, GENRE_MAP } from "../api/fetchPata";
 import { formatRelativeDate } from "../utils/formatDate";
+import { PLACEHOLDER_AUDIO } from "../utils/constants";
 import { usePodcast } from "../context/PodcastContext";
 import Header from "../components/UI/Header";
 import Loading from "../components/UI/Loading";
@@ -20,28 +23,24 @@ import Error from "../components/UI/Error";
 import styles from "./ShowDetail.module.css";
 
 export default function ShowDetail() {
-  // --- Get the dynamic :id from the URL ---
+  // Get the dynamic :id from the URL
   const { id } = useParams();
 
-  // --- Local state for the show data ---
-  const [show, setShow] = useState(null); // Full show data from API
+  // Local state for the show data
+  const [show, setShow] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // --- Global state from PodcastContext ---
-  const {
-    toggleFavourite, // Toggle favourite status
-    favourites, // Array of favourited episodes
-    setCurrentEpisode, // Set the episode to play
-    setIsPlaying, // Start/pause playback
-  } = usePodcast();
+  // Global state from PodcastContext
+  const { toggleFavourite, favourites, setCurrentEpisode, setIsPlaying } =
+    usePodcast();
 
   /**
-   * Fetches the show data when the component mounts or when the ID changes.
-   * Uses an AbortController to prevent memory leaks.
+   * Fetch show data when component mounts or ID changes.
+   * Uses mounted flag to prevent state updates on unmounted component.
    */
   useEffect(() => {
-    let mounted = true; // Track if component is still mounted
+    let mounted = true;
 
     async function loadShow() {
       try {
@@ -49,11 +48,11 @@ export default function ShowDetail() {
         setError(null);
 
         console.log(`📡 Fetching show with ID: ${id}`);
-        const data = await fetchShowById(id); // API call
+        const data = await fetchShowById(id);
         console.log(`✅ Show data received:`, data);
 
         if (mounted) {
-          setShow(data); // Store the fetched data
+          setShow(data);
         }
       } catch (err) {
         console.error(`❌ Failed to fetch show:`, err);
@@ -69,54 +68,49 @@ export default function ShowDetail() {
 
     loadShow();
 
-    // --- Cleanup: prevent state updates on unmounted component ---
+    // Cleanup: prevent state updates on unmounted component
     return () => {
       mounted = false;
     };
-  }, [id]); // Re-run when the ID changes
+  }, [id]);
 
   /**
-   * Handles playing an episode.
-   * Sets the episode data in global context and starts playback.
-   *
-   * @param {Object} episode - The episode object from the API.
-   * @param {string} seasonTitle - Title of the season this episode belongs to.
+   * Play an episode in the global audio player.
+   * @param {Object} episode - Episode object from API
+   * @param {string} seasonTitle - Title of the season
    */
   const playEpisode = (episode, seasonTitle) => {
-    // --- Build the episode object for the audio player ---
     const episodeData = {
-      id: episode.id || `ep-${Date.now()}`, // Fallback ID if missing
+      id: `ep-${id}-${episode.episode}`,
       title: episode.title || "Untitled Episode",
-      showTitle: show.title, // Show title (for display)
+      showTitle: show.title,
       seasonTitle: seasonTitle || "Unknown Season",
-      // Use a placeholder audio URL if none is provided
-      audioUrl:
-        episode.audioUrl ||
-        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+      // Use the API's file URL or fallback to placeholder
+      file: episode.file || PLACEHOLDER_AUDIO,
+      description: episode.description || "",
     };
 
     console.log(`🔊 Playing episode:`, episodeData);
 
-    // --- Update global audio state ---
     setCurrentEpisode(episodeData);
     setIsPlaying(true);
   };
 
   /**
-   * Checks if an episode is already favourited.
-   * @param {string} episodeId - The unique ID of the episode.
-   * @returns {boolean} True if the episode is in favourites.
+   * Check if an episode is favourited.
+   * @param {string} episodeId - Unique episode identifier
+   * @returns {boolean}
    */
   const isFavourite = (episodeId) => {
     return favourites.some((fav) => fav.id === episodeId);
   };
 
-  // --- Loading state ---
+  // Loading state
   if (loading) {
     return <Loading message="Loading show details..." />;
   }
 
-  // --- Error state ---
+  // Error state
   if (error) {
     return (
       <Error
@@ -126,7 +120,7 @@ export default function ShowDetail() {
     );
   }
 
-  // --- Not found state ---
+  // Not found state
   if (!show) {
     return (
       <div className={styles.container}>
@@ -141,12 +135,11 @@ export default function ShowDetail() {
     );
   }
 
-  // --- Map genre IDs to names ---
+  // Map genre IDs to names (handle both number arrays and string arrays)
   const genreNames = show.genres
-    ? show.genres.map((id) => GENRE_MAP[id] || "Unknown")
+    ? show.genres.map((g) => GENRE_MAP[g] || g)
     : [];
 
-  // --- Render the show details ---
   return (
     <div className={styles.container}>
       <Header />
@@ -156,7 +149,7 @@ export default function ShowDetail() {
         ← Back to all shows
       </Link>
 
-      {/* Hero section: image, title, meta, description */}
+      {/* Hero section with cover image and show info */}
       <div className={styles.hero}>
         <img
           src={show.image}
@@ -196,58 +189,65 @@ export default function ShowDetail() {
               const episodes = season.episodes || [];
 
               return (
-                <div key={season.id || idx} className={styles.seasonCard}>
+                <div key={season.season || idx} className={styles.seasonCard}>
                   <h3>{seasonTitle}</h3>
-                  <p>
+                  <p className={styles.episodeCount}>
                     {episodes.length} episode{episodes.length !== 1 ? "s" : ""}
                   </p>
 
                   {episodes.length > 0 ? (
                     <ul className={styles.episodeList}>
-                      {episodes.map((ep, i) => {
-                        const epId = ep.id || `ep-${idx}-${i}`;
+                      {episodes.map((ep) => {
+                        const epId = `ep-${id}-${ep.episode}`;
                         const fav = isFavourite(epId);
 
                         return (
                           <li key={epId} className={styles.episodeItem}>
-                            <span className={styles.episodeTitle}>
-                              {ep.title || `Episode ${i + 1}`}
-                            </span>
-                            <span className={styles.episodeDuration}>
-                              {ep.duration || "—"}
-                            </span>
+                            <div className={styles.episodeInfo}>
+                              <span className={styles.episodeNumber}>
+                                Ep {ep.episode}
+                              </span>
+                              <span className={styles.episodeTitle}>
+                                {ep.title || `Episode ${ep.episode}`}
+                              </span>
+                            </div>
+                            <div className={styles.episodeActions}>
+                              {/* Play button */}
+                              <button
+                                onClick={() => playEpisode(ep, seasonTitle)}
+                                className={styles.playBtn}
+                                aria-label={`Play ${ep.title}`}
+                                title="Play episode"
+                              >
+                                ▶️
+                              </button>
 
-                            {/* Play button */}
-                            <button
-                              onClick={() => playEpisode(ep, seasonTitle)}
-                              className={styles.playBtn}
-                              aria-label="Play episode"
-                            >
-                              ▶️
-                            </button>
-
-                            {/* Favourite button */}
-                            <button
-                              onClick={() =>
-                                toggleFavourite({
-                                  id: epId,
-                                  title: ep.title || `Episode ${i + 1}`,
-                                  showTitle: show.title,
-                                  seasonTitle: seasonTitle,
-                                  audioUrl:
-                                    ep.audioUrl ||
-                                    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-                                })
-                              }
-                              className={styles.favBtn}
-                              aria-label={
-                                fav
-                                  ? "Remove from favourites"
-                                  : "Add to favourites"
-                              }
-                            >
-                              {fav ? "❤️" : "🤍"}
-                            </button>
+                              {/* Favourite button */}
+                              <button
+                                onClick={() =>
+                                  toggleFavourite({
+                                    id: epId,
+                                    title: ep.title || `Episode ${ep.episode}`,
+                                    showTitle: show.title,
+                                    seasonTitle: seasonTitle,
+                                    file: ep.file || PLACEHOLDER_AUDIO,
+                                  })
+                                }
+                                className={styles.favBtn}
+                                aria-label={
+                                  fav
+                                    ? "Remove from favourites"
+                                    : "Add to favourites"
+                                }
+                                title={
+                                  fav
+                                    ? "Remove from favourites"
+                                    : "Add to favourites"
+                                }
+                              >
+                                {fav ? "❤️" : "🤍"}
+                              </button>
+                            </div>
                           </li>
                         );
                       })}

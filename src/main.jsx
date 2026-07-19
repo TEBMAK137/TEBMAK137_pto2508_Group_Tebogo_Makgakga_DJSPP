@@ -1,5 +1,6 @@
 /**
- * Entry point – wraps the app in BrowserRouter for client‑side routing.
+ * Entry point for the React application.
+ * Wraps the app in StrictMode and BrowserRouter for client-side routing.
  */
 import React from "react";
 import ReactDOM from "react-dom/client";

@@ -1,7 +1,8 @@
 /**
- * Theme Toggle Button – Switches between light and dark mode.
+ * ThemeToggle Component – Switches between light and dark mode.
+ *
  * - Reads current theme from PodcastContext
- * - Persists selection to localStorage
+ * - Persists selection to localStorage via PodcastProvider
  * - Updates the entire app UI via CSS custom properties
  *
  * @component
@@ -16,11 +17,9 @@ export default function ThemeToggle() {
 
   /**
    * Toggles between 'light' and 'dark' themes.
-   * The PodcastProvider handles localStorage persistence.
    */
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
-    console.log(`🎨 Theme changed to: ${newTheme}`);
     setTheme(newTheme);
   };
 

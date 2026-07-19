@@ -1,5 +1,5 @@
 {
-  "name": "podcast-djspp-final",
+  "name": "podcast-djs05-final",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -12,9 +12,7 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.26.1",
-    "react-slick": "^0.30.3",
-    "slick-carousel": "^1.8.1"
+    "react-router-dom": "^6.26.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",

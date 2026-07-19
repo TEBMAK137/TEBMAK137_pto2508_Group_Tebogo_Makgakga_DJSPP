@@ -1,11 +1,12 @@
 /**
  * PodcastContext – Global state provider for the entire app.
+ *
  * Manages:
  * - Podcast data (fetched from API)
  * - Search, filter, sort, pagination
- * - Theme (light/dark)
- * - Favourites (localStorage)
- * - Audio player state
+ * - Theme (light/dark) with localStorage persistence
+ * - Favourites (localStorage persistence)
+ * - Audio player state (current episode, play/pause, progress)
  *
  * @module PodcastContext
  */
@@ -19,11 +20,17 @@ import React, {
 import { fetchPodcasts } from "../api/fetchPata";
 import { SORT_OPTIONS, ITEMS_PER_PAGE } from "../utils/constants";
 
-// --- Create the context ---
+// ============================================
+// Create the context
+// ============================================
 const PodcastContext = createContext(null);
 
+// ============================================
+// Provider Component
+// ============================================
+
 /**
- * Provider component – wraps the app and provides all state.
+ * PodcastProvider – Wraps the app and provides all global state.
  *
  * @param {Object} props
  * @param {React.ReactNode} props.children - Child components
@@ -67,9 +74,9 @@ export function PodcastProvider({ children }) {
 
   /**
    * Toggle favourite status for an episode.
-   * If already favourited, removes it; otherwise adds it.
+   * If already favourited, removes it; otherwise adds it with a timestamp.
    *
-   * @param {Object} episode - Episode object to toggle.
+   * @param {Object} episode - Episode object to toggle
    */
   const toggleFavourite = (episode) => {
     setFavourites((prev) => {
@@ -100,11 +107,13 @@ export function PodcastProvider({ children }) {
     setCurrentPage(1);
   }, [searchTerm, sortBy, selectedGenres]);
 
-  // --- Filter, search, sort pipeline ---
+  // ============================================
+  // Filter, Search, Sort Pipeline
+  // ============================================
   const processed = useMemo(() => {
     let result = [...allPodcasts];
 
-    // 1. Filter by search term (case‑insensitive)
+    // 1. Filter by search term (case-insensitive title match)
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       result = result.filter((p) => p.title.toLowerCase().includes(term));
@@ -134,17 +143,22 @@ export function PodcastProvider({ children }) {
       default:
         break;
     }
+
     return result;
   }, [allPodcasts, searchTerm, sortBy, selectedGenres]);
 
-  // --- Pagination ---
+  // ============================================
+  // Pagination
+  // ============================================
   const totalPages = Math.ceil(processed.length / ITEMS_PER_PAGE);
   const paginated = processed.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE,
   );
 
-  // --- Context value object ---
+  // ============================================
+  // Context Value Object
+  // ============================================
   const value = {
     // Podcast data
     podcasts: paginated,
@@ -171,7 +185,7 @@ export function PodcastProvider({ children }) {
     favourites,
     toggleFavourite,
 
-    // Audio
+    // Audio player
     currentEpisode,
     setCurrentEpisode,
     isPlaying,
@@ -187,11 +201,15 @@ export function PodcastProvider({ children }) {
   );
 }
 
+// ============================================
+// Custom Hook
+// ============================================
+
 /**
- * Custom hook to access the podcast context.
+ * usePodcast – Custom hook to access the podcast context.
  *
- * @returns {Object} The podcast context value.
- * @throws {Error} If used outside of PodcastProvider.
+ * @returns {Object} The podcast context value
+ * @throws {Error} If used outside of PodcastProvider
  */
 export function usePodcast() {
   const context = useContext(PodcastContext);

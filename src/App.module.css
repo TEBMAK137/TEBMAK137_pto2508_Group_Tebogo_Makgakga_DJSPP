@@ -1,5 +1,5 @@
 .app {
   min-height: 100vh;
   background: var(--bg);
-  padding-bottom: 80px; /* space for audio player */
+  padding-bottom: 100px;
 }

@@ -3,29 +3,43 @@
   color: inherit;
   display: block;
 }
+
 .card {
   background: var(--card-bg);
   border-radius: 0.75rem;
   overflow: hidden;
   border: 1px solid var(--border);
   box-shadow: 0 1px 3px var(--shadow);
-  transition: all 0.2s;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
   cursor: pointer;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
+
 .card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 25px -5px var(--shadow);
   border-color: #ddd6fe;
 }
+
 .image {
   width: 100%;
-  aspect-ratio: 1/1;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
-  background: #e2e8f0;
+  background: var(--border);
 }
+
 .content {
   padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
+
 .title {
   font-weight: 700;
   font-size: 1.1rem;
@@ -35,13 +49,16 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  line-height: 1.3;
 }
+
 .meta {
   margin-top: 0.5rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+
 .badge {
   display: inline-block;
   background: #ede9fe;
@@ -51,12 +68,14 @@
   padding: 0.2rem 0.6rem;
   border-radius: 9999px;
 }
+
 .genres {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
   margin: 0.75rem 0;
 }
+
 .genreTag {
   background: #f1f1fe;
   color: #4c1d95;
@@ -65,8 +84,9 @@
   padding: 0.2rem 0.6rem;
   border-radius: 9999px;
 }
+
 .updated {
   font-size: 0.7rem;
-  color: #64748b;
-  margin-top: 0.5rem;
+  color: var(--muted);
+  margin-top: auto;
 }

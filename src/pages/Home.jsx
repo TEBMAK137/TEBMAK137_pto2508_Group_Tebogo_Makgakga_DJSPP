@@ -1,3 +1,17 @@
+/**
+ * Home Page – Main landing page with podcast discovery.
+ *
+ * Features:
+ * - Recommended carousel at top
+ * - Search bar
+ * - Sort dropdown
+ * - Genre filter buttons
+ * - Responsive podcast grid
+ * - Pagination
+ *
+ * @component
+ * @returns {JSX.Element}
+ */
 import React from "react";
 import { usePodcast } from "../context/PodcastContext";
 import Header from "../components/UI/Header";
@@ -28,23 +42,37 @@ export default function Home() {
     allPodcasts,
   } = usePodcast();
 
-  if (loading) return <Loading />;
-  if (error)
+  // Show loading spinner while fetching
+  if (loading) return <Loading message="Loading podcasts..." />;
+
+  // Show error message if fetch failed
+  if (error && podcasts.length === 0) {
     return <Error message={error} onRetry={() => window.location.reload()} />;
+  }
 
   return (
     <div className={styles.container}>
       <Header />
+
+      {/* Recommended carousel - shows top podcasts */}
       <RecommendedCarousel podcasts={allPodcasts} />
+
+      {/* Search and sort controls */}
       <div className={styles.controls}>
         <SearchBar value={searchTerm} onChange={setSearchTerm} />
         <SortSelect value={sortBy} onChange={setSortBy} />
       </div>
+
+      {/* Genre filter buttons */}
       <GenreFilter
         selectedGenres={selectedGenres}
         onChange={setSelectedGenres}
       />
+
+      {/* Podcast grid */}
       <PodcastGrid podcasts={podcasts} />
+
+      {/* Pagination */}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}

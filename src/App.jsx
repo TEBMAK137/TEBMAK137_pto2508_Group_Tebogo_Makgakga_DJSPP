@@ -1,3 +1,18 @@
+/**
+ * App Component – Root component with routing and global audio player.
+ *
+ * Routes:
+ * - / → Home page
+ * - /show/:id → Show detail page
+ * - /favourites → Favourites page
+ *
+ * Features:
+ * - PodcastProvider wraps entire app for global state
+ * - AudioPlayer is fixed at bottom and persists across routes
+ *
+ * @component
+ * @returns {JSX.Element}
+ */
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { PodcastProvider } from "./context/PodcastContext";

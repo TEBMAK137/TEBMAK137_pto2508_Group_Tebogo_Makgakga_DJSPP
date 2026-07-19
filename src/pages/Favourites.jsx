@@ -1,10 +1,12 @@
 /**
  * Favourites Page – Displays all favourited episodes.
+ *
  * Features:
  * - Groups favourites by show title
  * - Sorting options (newest, oldest, title)
  * - Remove button to unfavourite
  * - Shows date added
+ * - Play button to play episode
  *
  * @component
  * @returns {JSX.Element}
@@ -16,13 +18,12 @@ import Header from "../components/UI/Header";
 import styles from "./Favourites.module.css";
 
 export default function Favourites() {
-  // --- Get favourites and toggle function from context ---
-  const { favourites, toggleFavourite } = usePodcast();
+  const { favourites, toggleFavourite, setCurrentEpisode, setIsPlaying } =
+    usePodcast();
   const [sortBy, setSortBy] = useState("newest");
 
   /**
-   * Sorts favourites based on the selected sort option.
-   * Uses useMemo to avoid re‑sorting on every render.
+   * Sort favourites based on selected option.
    */
   const sortedFavourites = useMemo(() => {
     const list = [...favourites];
@@ -43,8 +44,7 @@ export default function Favourites() {
   }, [favourites, sortBy]);
 
   /**
-   * Groups favourites by show title.
-   * @type {Object<string, Array>}
+   * Group favourites by show title.
    */
   const grouped = sortedFavourites.reduce((acc, fav) => {
     const key = fav.showTitle || "Unknown Show";
@@ -53,11 +53,25 @@ export default function Favourites() {
     return acc;
   }, {});
 
+  /**
+   * Play a favourited episode.
+   */
+  const playFavourite = (ep) => {
+    setCurrentEpisode({
+      id: ep.id,
+      title: ep.title,
+      showTitle: ep.showTitle,
+      seasonTitle: ep.seasonTitle,
+      file: ep.file,
+    });
+    setIsPlaying(true);
+  };
+
   return (
     <div className={styles.container}>
       <Header />
 
-      <h2>❤️ Your Favourites</h2>
+      <h2 className={styles.heading}>❤️ Your Favourites</h2>
 
       {/* Sorting controls */}
       <div className={styles.controls}>
@@ -84,35 +98,50 @@ export default function Favourites() {
           </Link>
         </div>
       ) : (
-        // Grouped list
+        // Grouped list by show
         Object.entries(grouped).map(([showTitle, episodes]) => (
           <div key={showTitle} className={styles.group}>
             <h3>{showTitle}</h3>
-            <ul>
+            <ul className={styles.episodeList}>
               {episodes.map((ep) => (
                 <li key={ep.id} className={styles.episodeItem}>
-                  <span>
-                    {ep.title}
+                  <div className={styles.episodeInfo}>
+                    <span className={styles.episodeTitle}>{ep.title}</span>
                     {ep.seasonTitle && (
-                      <span className={styles.season}> • {ep.seasonTitle}</span>
+                      <span className={styles.season}>• {ep.seasonTitle}</span>
                     )}
-                  </span>
-                  <span className={styles.date}>
-                    Added {new Date(ep.dateAdded).toLocaleDateString()}
-                  </span>
-                  <button
-                    onClick={() => toggleFavourite(ep)}
-                    className={styles.removeBtn}
-                    aria-label="Remove from favourites"
-                  >
-                    ❌
-                  </button>
+                    <span className={styles.date}>
+                      Added {new Date(ep.dateAdded).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className={styles.actions}>
+                    <button
+                      onClick={() => playFavourite(ep)}
+                      className={styles.playBtn}
+                      aria-label={`Play ${ep.title}`}
+                      title="Play episode"
+                    >
+                      ▶️
+                    </button>
+                    <button
+                      onClick={() => toggleFavourite(ep)}
+                      className={styles.removeBtn}
+                      aria-label="Remove from favourites"
+                      title="Remove from favourites"
+                    >
+                      ❌
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
           </div>
         ))
       )}
+
+      <Link to="/" className={styles.backLink}>
+        ← Back to Home
+      </Link>
     </div>
   );
 }

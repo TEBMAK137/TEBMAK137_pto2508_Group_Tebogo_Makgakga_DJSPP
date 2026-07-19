@@ -1,53 +1,142 @@
 .container {
   max-width: 1024px;
   margin: 0 auto;
-  padding: 0 1.5rem 2rem;
+  padding: 0 1.5rem 8rem;
   background: var(--bg);
   min-height: 100vh;
 }
+
+.heading {
+  margin: 1.5rem 0 1rem;
+  font-size: 1.5rem;
+}
+
 .controls {
   margin: 1rem 0;
   display: flex;
   gap: 1rem;
   align-items: center;
 }
+
 .sortSelect {
-  padding: 0.3rem;
+  padding: 0.4rem 0.8rem;
   border-radius: 0.5rem;
   border: 1px solid var(--border);
   background: var(--card-bg);
   color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
 }
+
 .group {
   background: var(--card-bg);
   border-radius: 1rem;
-  padding: 1rem;
+  padding: 1.25rem;
   margin-bottom: 1.5rem;
   border: 1px solid var(--border);
+  box-shadow: 0 2px 4px var(--shadow);
 }
+
 .group h3 {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
+
+.episodeList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 .episodeItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0;
+  padding: 0.75rem 0;
   border-bottom: 1px solid var(--border);
+  gap: 1rem;
 }
+
+.episodeItem:last-child {
+  border-bottom: none;
+}
+
+.episodeInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.episodeTitle {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.season {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 .date {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--muted);
 }
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.playBtn,
 .removeBtn {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.2rem;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+  line-height: 1;
 }
+
+.playBtn:hover,
+.removeBtn:hover {
+  transform: scale(1.15);
+  background: var(--border);
+}
+
+.empty {
+  text-align: center;
+  padding: 3rem 0;
+  color: var(--muted);
+}
+
 .backLink {
   display: inline-block;
   margin-top: 1rem;
-  color: #4f46e5;
+  color: var(--accent);
   text-decoration: none;
+  font-weight: 500;
+}
+
+.backLink:hover {
+  color: var(--accent-hover);
+}
+
+@media (max-width: 640px) {
+  .episodeItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .actions {
+    align-self: flex-end;
+  }
 }

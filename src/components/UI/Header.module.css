@@ -6,12 +6,17 @@
   background: var(--card-bg);
   border-bottom: 1px solid var(--border);
   box-shadow: 0 1px 3px var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
+
 .left {
   display: flex;
   align-items: center;
   gap: 1.5rem;
 }
+
 .logo {
   font-size: 1.5rem;
   font-weight: 800;
@@ -21,15 +26,19 @@
   color: transparent;
   text-decoration: none;
 }
+
 .nav {
   display: flex;
   gap: 1rem;
 }
+
 .nav a {
   text-decoration: none;
   color: var(--text);
   font-weight: 500;
+  transition: color 0.2s ease;
 }
+
 .nav a:hover {
-  color: #7c3aed;
+  color: var(--accent);
 }

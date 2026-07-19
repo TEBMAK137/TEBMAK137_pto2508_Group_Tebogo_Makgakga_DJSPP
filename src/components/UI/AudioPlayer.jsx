@@ -1,10 +1,12 @@
 /**
- * Global Audio Player – Fixed at the bottom of the screen.
+ * AudioPlayer Component – Global fixed audio player at bottom of screen.
+ *
  * Features:
  * - Play/Pause toggle
  * - Progress bar with seek functionality
- * - Displays current episode title and show
+ * - Displays current episode title, show, and season
  * - Persists across page navigation
+ * - Handles audio loading errors gracefully
  * - Warns user on page reload during playback
  *
  * @component
@@ -12,149 +14,172 @@
  */
 import React, { useRef, useEffect } from "react";
 import { usePodcast } from "../../context/PodcastContext";
+import { PLACEHOLDER_AUDIO } from "../../utils/constants";
 import styles from "./AudioPlayer.module.css";
 
 export default function AudioPlayer() {
-  // --- Get global audio state from context ---
+  // Get global audio state from context
   const {
-    currentEpisode, // Current episode object { title, showTitle, audioUrl, ... }
-    isPlaying, // Boolean: true if audio is playing
-    setIsPlaying, // Function to start/pause playback
-    progress, // Current playback position (seconds)
-    setProgress, // Function to update playback position
-    duration, // Total audio duration (seconds)
-    setDuration, // Function to update duration
+    currentEpisode,
+    isPlaying,
+    setIsPlaying,
+    progress,
+    setProgress,
+    duration,
+    setDuration,
   } = usePodcast();
 
-  // --- Reference to the actual HTML <audio> element ---
+  // Reference to the actual HTML <audio> element
   const audioRef = useRef(null);
 
   /**
-   * Loads a new episode into the audio element.
-   * Runs when currentEpisode changes.
+   * Effect: Load new episode when currentEpisode changes.
+   * Sets the audio source and attempts to play.
    */
   useEffect(() => {
-    if (!currentEpisode) {
-      console.log("⏹️ No episode to play");
-      return;
+    const audio = audioRef.current;
+    if (!audio || !currentEpisode) return;
+
+    console.log(`Loading audio for: ${currentEpisode.title}`);
+
+    // Determine audio URL - use episode file or fallback
+    const audioUrl =
+      currentEpisode.file || currentEpisode.audioUrl || PLACEHOLDER_AUDIO;
+
+    // Only set src if it's different (prevents unnecessary reloads)
+    if (audio.src !== audioUrl) {
+      audio.src = audioUrl;
+      audio.load();
     }
 
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    console.log(`🎵 Loading audio for: ${currentEpisode.title}`);
-    console.log(`🔊 Audio URL: ${currentEpisode.audioUrl}`);
-
-    // --- Set the audio source and load it ---
-    audio.src = currentEpisode.audioUrl;
-    audio.load();
-
-    // --- Handle audio loading errors ---
-    audio.onerror = (e) => {
-      console.error("❌ Audio loading error:", e);
-      console.error("❌ Failed to load:", audio.src);
-
-      // Try to fallback to a working demo audio
-      if (audio.src.includes("soundhelix.com")) {
-        console.log("🔄 Using fallback audio...");
-        audio.src = "https://www.w3schools.com/html/horse.mp3";
-        audio.load();
-      }
-    };
-
-    // --- Handle successful loading ---
-    audio.oncanplay = () => {
-      console.log("✅ Audio loaded successfully");
+    // Handle successful loading
+    const handleCanPlay = () => {
+      console.log("Audio loaded successfully");
       setDuration(audio.duration || 0);
-      // Auto-play if isPlaying is true
       if (isPlaying) {
         audio.play().catch((err) => {
-          console.warn("⚠️ Auto-play blocked:", err);
+          console.warn("Auto-play blocked:", err);
           setIsPlaying(false);
         });
       }
     };
 
-    // Cleanup function
-    return () => {
-      audio.onerror = null;
-      audio.oncanplay = null;
+    // Handle errors
+    const handleError = () => {
+      console.error("Audio loading error, trying fallback...");
+      if (audio.src !== PLACEHOLDER_AUDIO) {
+        audio.src = PLACEHOLDER_AUDIO;
+        audio.load();
+      }
     };
-  }, [currentEpisode, setDuration, setIsPlaying]);
+
+    // Handle track ending
+    const handleEnded = () => {
+      console.log("Episode finished");
+      setIsPlaying(false);
+      setProgress(0);
+    };
+
+    audio.addEventListener("canplaythrough", handleCanPlay);
+    audio.addEventListener("error", handleError);
+    audio.addEventListener("ended", handleEnded);
+
+    return () => {
+      audio.removeEventListener("canplaythrough", handleCanPlay);
+      audio.removeEventListener("error", handleError);
+      audio.removeEventListener("ended", handleEnded);
+    };
+  }, [currentEpisode, isPlaying, setDuration, setIsPlaying, setProgress]);
 
   /**
-   * Controls playback (play/pause) when isPlaying changes.
-   * Runs every time isPlaying toggles.
+   * Effect: Control playback (play/pause) when isPlaying changes.
    */
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     if (isPlaying) {
-      console.log("▶️ Playing audio");
+      console.log("Playing audio");
       audio.play().catch((err) => {
-        console.warn("⚠️ Play failed:", err);
+        console.warn("Play failed:", err);
         setIsPlaying(false);
       });
     } else {
-      console.log("⏸️ Pausing audio");
+      console.log("Pausing audio");
       audio.pause();
     }
   }, [isPlaying, setIsPlaying]);
 
   /**
-   * Updates progress state when the audio plays.
+   * Effect: Warn user before leaving page if audio is playing.
+   */
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isPlaying) {
+        e.preventDefault();
+        e.returnValue =
+          "Audio is currently playing. Are you sure you want to leave?";
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isPlaying]);
+
+  /**
+   * Update progress state as audio plays.
    */
   const handleTimeUpdate = () => {
     const audio = audioRef.current;
     if (audio) {
       setProgress(audio.currentTime);
-      setDuration(audio.duration || 0);
+      if (audio.duration && !isNaN(audio.duration)) {
+        setDuration(audio.duration);
+      }
     }
   };
 
   /**
-   * Handles user seeking via the progress slider.
-   * @param {Event} e - The input event from the slider.
+   * Handle user seeking via the progress slider.
+   * @param {Event} e - Input event from range slider
    */
   const handleSeek = (e) => {
     const audio = audioRef.current;
     const newTime = parseFloat(e.target.value);
-    if (audio) {
+    if (audio && !isNaN(newTime)) {
       audio.currentTime = newTime;
       setProgress(newTime);
-      console.log(`⏩ Seeked to ${newTime}s`);
     }
   };
 
-  // --- If no episode is selected, show nothing ---
+  // If no episode is selected, don't render the player
   if (!currentEpisode) {
     return null;
   }
 
-  // --- Format seconds into MM:SS ---
+  /**
+   * Format seconds into MM:SS display.
+   * @param {number} seconds - Time in seconds
+   * @returns {string} Formatted time string
+   */
   const formatTime = (seconds) => {
-    if (!seconds || isNaN(seconds)) return "0:00";
+    if (!seconds || isNaN(seconds) || !isFinite(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${String(secs).padStart(2, "0")}`;
   };
 
-  // --- Render the audio player ---
   return (
     <div className={styles.player}>
-      {/* Hidden audio element */}
+      {/* Hidden audio element - the actual audio engine */}
       <audio
         ref={audioRef}
         onTimeUpdate={handleTimeUpdate}
-        onEnded={() => {
-          console.log("⏹️ Episode finished");
-          setIsPlaying(false);
-          setProgress(0);
-        }}
+        preload="metadata"
       />
 
-      {/* Episode info */}
+      {/* Episode info display */}
       <div className={styles.info}>
         <span className={styles.title}>{currentEpisode.title}</span>
         <span className={styles.showTitle}> – {currentEpisode.showTitle}</span>

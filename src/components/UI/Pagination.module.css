@@ -3,7 +3,9 @@
   justify-content: center;
   gap: 0.5rem;
   margin-top: 2rem;
+  flex-wrap: wrap;
 }
+
 .button {
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
@@ -12,20 +14,24 @@
   color: var(--text);
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
+
 .button:hover:not(:disabled) {
   background: var(--border);
 }
+
 .button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
 .active {
-  background: #7c3aed;
+  background: var(--accent);
   color: white;
-  border-color: #7c3aed;
+  border-color: var(--accent);
 }
+
 .active:hover {
-  background: #6d28d9;
+  background: var(--accent-hover);
 }
