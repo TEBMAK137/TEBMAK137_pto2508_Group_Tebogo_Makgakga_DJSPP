@@ -1,4 +1,4 @@
-# 🎧 PodcastHub – DJS05 Final
+# 🎧 PodcastHub – DJSPP Final
 
 A feature‑rich React podcast discovery app with global audio player, favourites, recommended carousel, and theme toggle.
 
